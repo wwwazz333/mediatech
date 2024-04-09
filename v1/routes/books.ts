@@ -13,7 +13,7 @@ router.get('/', async function (req, res) {
 	}
 	catch (e: any) {
 		console.error("Error getting books", e);
-		res.status(500).json(e);
+		res.status(404).json(e);
 	}
 });
 
@@ -28,7 +28,7 @@ router.get('/:id', async function (req, res) {
 
 	} catch (e: any) {
 		console.error(`Error parsing id ${id}`, e.message);
-		return res.status(400).json(e);
+		return res.status(404).json(e);
 	}
 });
 
@@ -42,7 +42,7 @@ router.post('/', async function (req, res) {
 	}
 	catch (e: any) {
 		console.error("Error creation book", e.message);
-		res.status(500).json(e);
+		res.status(400).json(e);
 	}
 });
 
@@ -58,7 +58,25 @@ router.put('/:id', async function (req, res) {
 	}
 	catch (e: any) {
 		console.error("Error updating book", e.message);
-		res.status(500).json(e);
+		res.status(400).json(e);
+	}
+});
+
+
+///Delete a book
+///return the deleted book
+router.delete('/:id', async function (req, res) {
+	const { id } = req.params;
+	try {
+		const idBook = z.number().parse(parseInt(id));
+		const oldBook = await bookService.getById(idBook);
+		console.debug("oldBook", oldBook)
+		await bookService.remove(idBook);
+		res.status(200).json(oldBook);
+	}
+	catch (e: any) {
+		console.error("Error deleting book", e.message);
+		res.status(400).json(e);
 	}
 });
 

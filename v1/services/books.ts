@@ -56,7 +56,7 @@ export async function getById(id: number): Promise<Book> {
 	}
 }
 
-//Create a book
+///Create a book
 export async function create(book: Book): Promise<void> {
 	const sql = `INSERT INTO ${tableName} (id, name, description, genre, numberAvailable) VALUES (?, ?, ?, ?, ?)`;
 	const params = [book.id, book.name, book.description, book.genre, book.numberAvailable];
@@ -73,13 +73,30 @@ export async function create(book: Book): Promise<void> {
 }
 
 
-//Update a book
+///Update a book
 export async function update(id: number, book: Book): Promise<void> {
 	const sql = `UPDATE ${tableName} SET name = ?, description = ?, genre = ?, numberAvailable = ? WHERE id = ?`;
 	const params = [book.name, book.description, book.genre, book.numberAvailable, id];
 
 	await new Promise(async (resolve, reject) => {
 		await database.run(sql, params, async (err) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(null);
+			}
+		});
+	});
+}
+
+
+///Delete a book
+export async function remove(id: number): Promise<void> {
+	const sql = `DELETE FROM ${tableName} WHERE id = ?`;
+	const params = [id];
+
+	await new Promise((resolve, reject) => {
+		database.run(sql, params, (err) => {
 			if (err) {
 				reject(err);
 			} else {
