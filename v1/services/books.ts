@@ -23,8 +23,36 @@ export async function getAll(): Promise<Book[]> {
 
 		return books;
 	} catch (e: any) {
-		console.error("Error parsing books from BDD", e.message);
 		throw new Error("Error parsing books from BDD");
+	}
+}
+
+///Get a book by id
+export async function getById(id: number): Promise<Book> {
+	const sql = `SELECT * FROM ${tableName} WHERE id = ?`;
+	const params = [id];
+
+	const row = await new Promise((resolve, reject) => {
+		database.get(sql, params, (err, row) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(row);
+			}
+		});
+	});
+
+
+
+	if (row) {
+		try {
+			const book = bookSchema.parse(row);
+			return book;
+		} catch (e: any) {
+			throw new Error("Error parsing book from BDD");
+		}
+	} else {
+		throw new Error(`Book with id ${id} not found`);
 	}
 }
 
