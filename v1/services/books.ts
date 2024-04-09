@@ -57,16 +57,16 @@ export async function getById(id: number): Promise<Book> {
 }
 
 ///Create a book
-export async function create(book: Book): Promise<void> {
+export async function create(book: Book): Promise<Book> {
 	const sql = `INSERT INTO ${tableName} (id, name, description, genre, numberAvailable) VALUES (?, ?, ?, ?, ?)`;
 	const params = [book.id, book.name, book.description, book.genre, book.numberAvailable];
 
-	await new Promise((resolve, reject) => {
-		database.run(sql, params, (err) => {
+	return await new Promise((resolve, reject) => {
+		database.run(sql, params, async function (err) {
 			if (err) {
 				reject(err);
 			} else {
-				resolve(null);
+				resolve(await getById(this.lastID));
 			}
 		});
 	});

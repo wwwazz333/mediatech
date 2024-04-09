@@ -37,8 +37,8 @@ router.get('/:id', async function (req, res) {
 router.post('/', async function (req, res) {
 	try {
 		const newBook = bookSchema.parse(req.body);
-		await bookService.create(newBook);
-		res.status(201).json(newBook);
+		const bookCreated = await bookService.create(newBook);
+		res.status(201).json(bookCreated);
 	}
 	catch (e: any) {
 		console.error("Error creation book", e.message);
