@@ -71,3 +71,20 @@ export async function create(book: Book): Promise<void> {
 		});
 	});
 }
+
+
+//Update a book
+export async function update(id: number, book: Book): Promise<void> {
+	const sql = `UPDATE ${tableName} SET name = ?, description = ?, genre = ?, numberAvailable = ? WHERE id = ?`;
+	const params = [book.name, book.description, book.genre, book.numberAvailable, id];
+
+	await new Promise(async (resolve, reject) => {
+		await database.run(sql, params, async (err) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(null);
+			}
+		});
+	});
+}
