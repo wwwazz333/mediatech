@@ -72,6 +72,7 @@ const db = new sqlite3.Database(dbName, (err) => {
 		CREATE TABLE IF NOT EXISTS "Borrow" (
 			"idBook" INTEGER NOT NULL UNIQUE,
 			"idUser" INTEGER NOT NULL,
+			"dateBorrow" TEXT NOT NULL,
 			PRIMARY KEY("idBook", "idUser"),
 			FOREIGN KEY ("idBook") REFERENCES "Book"("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
 			FOREIGN KEY ("idUser") REFERENCES "User"("id")
