@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Book, bookSchema } from "../models/books";
+import { Book, BookSearch, bookSchema } from "../models/books";
 import database from "./database";
 
 const tableName = "Book";
@@ -24,6 +24,33 @@ export async function getAll(): Promise<Book[]> {
 		return books;
 	} catch (e: any) {
 		throw new Error("Error parsing books from BDD");
+	}
+}
+
+///Research books
+///return the books found
+export async function searchBook({ id, name, genre, authorName }: BookSearch): Promise<Book[]> {
+	const sql = `SELECT * FROM ${tableName} WHERE 1 = 1 AND (? IS NULL OR id = ?) AND (? IS NULL OR LOWER(name) LIKE '%' || LOWER(?) || '%') AND (? IS NULL OR LOWER(genre) LIKE '%' || LOWER(?) || '%') AND (? IS NULL OR id IN (SELECT idBook FROM Written WHERE idAuthor IN (SELECT id FROM Author WHERE LOWER(name) LIKE '%' || LOWER(?) || '%')))`;
+	const params = [id, id, name, name, genre, genre, authorName, authorName];
+
+	const rows = await new Promise((resolve, reject) => {
+		database.all(sql, params, (err, rows) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(rows);
+			}
+		});
+	});
+	if (rows) {
+		try {
+			const books = z.array(bookSchema).parse(rows);
+			return books;
+		} catch (e: any) {
+			throw new Error("Error parsing books from BDD : " + e.message);
+		}
+	} else {
+		throw new Error("No books found");
 	}
 }
 
