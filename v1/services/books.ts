@@ -58,13 +58,14 @@ export async function getById(id: number): Promise<Book> {
 
 
 
-//Get all books by name
+///Get all books by name
+///return the books found (that contains the name)
 export async function getByName(name: string): Promise<Book[]> {
-	const sql = `SELECT * FROM ${tableName} WHERE name = ?`;
+	const sql = `SELECT * FROM ${tableName} WHERE LOWER(name) LIKE '%' || LOWER(?) || '%'`;
 	const params = [name];
 
-	const row = await new Promise((resolve, reject) => {
-		database.get(sql, params, (err, row) => {
+	const rows = await new Promise((resolve, reject) => {
+		database.all(sql, params, (err, row) => {
 			if (err) {
 				reject(err);
 			} else {
@@ -73,11 +74,12 @@ export async function getByName(name: string): Promise<Book[]> {
 		});
 	});
 
-	if (row) {
+	if (rows) {
 		try {
-			const books = z.array(bookSchema).parse(row);
+			const books = z.array(bookSchema).parse(rows);
 			return books;
 		} catch (e: any) {
+			console.log("row", rows)
 			throw new Error("Error parsing book from BDD : " + e.message);
 		}
 	} else {
@@ -86,12 +88,13 @@ export async function getByName(name: string): Promise<Book[]> {
 }
 
 //Get all books by genre
+///return the books found (that contains the genre)
 export async function getByGenre(genre: string): Promise<Book[]> {
-	const sql = `SELECT * FROM ${tableName} WHERE genre LIKE '%?%'`;
+	const sql = `SELECT * FROM ${tableName} WHERE LOWER(genre) LIKE '%' || LOWER(?) || '%'`;
 	const params = [genre];
 
 	const row = await new Promise((resolve, reject) => {
-		database.get(sql, params, (err, row) => {
+		database.all(sql, params, (err, row) => {
 			if (err) {
 				reject(err);
 			} else {
@@ -112,30 +115,31 @@ export async function getByGenre(genre: string): Promise<Book[]> {
 	}
 }
 
-//Get all books by author
-export async function getByAuthor(author: string): Promise<Book[]> {
-	const sql = `SELECT * FROM ${tableName} WHERE author = ?`;
-	const params = [author];
+///Get all books by author name
+///return the books found (that contains the author name)
+export async function getByAuthor(nameAuthor: string): Promise<Book[]> {
+	const sql = `SELECT * FROM ${tableName} as B, Written as W, Author as A WHERE B.id = W.idBook AND W.idAuthor = A.id AND LOWER(A.name) LIKE '%' || LOWER(?) || '%'`;
+	const params = [nameAuthor];
 
-	const row = await new Promise((resolve, reject) => {
-		database.get(sql, params, (err, row) => {
+	const rows = await new Promise((resolve, reject) => {
+		database.all(sql, params, (err, rows) => {
 			if (err) {
 				reject(err);
 			} else {
-				resolve(row);
+				resolve(rows);
 			}
 		});
 	});
 
-	if (row) {
+	if (rows) {
 		try {
-			const books = z.array(bookSchema).parse(row);
+			const books = z.array(bookSchema).parse(rows);
 			return books;
 		} catch (e: any) {
-			throw new Error("Error parsing book from BDD : " + e.message);
+			throw new Error("Error parsing books from BDD : " + e.message);
 		}
 	} else {
-		throw new Error(`Book with author ${author} not found`);
+		throw new Error(`Book with author ${nameAuthor} not found`);
 	}
 }
 
