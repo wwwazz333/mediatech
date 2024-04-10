@@ -2,6 +2,7 @@ import { Router } from "express";
 const router = Router();
 
 ///All CRUD operations for users are in the user service
+import { UserSearch, userSearchSchema } from "../models/user";
 import * as userService from "../services/users";
 
 ///Get all users
@@ -12,6 +13,23 @@ router.get('/', async function (req, res) {
 	}
 	catch (e: any) {
 		console.error("Error getting users", e);
+		res.status(404).send(e.message);
+	}
+});
+///Search users
+router.get('/search', async function (req, res) {
+	const { id, name } = req.query;
+	console.log("serarch")
+	try {
+		const userSearch: UserSearch = userSearchSchema.parse({
+			id: id ? parseInt(id as string) : null,
+			name: name
+		});
+		const users = await userService.searchUser(userSearch);
+		res.json(users);
+	}
+	catch (e: any) {
+		console.error("Error searching users", e.message);
 		res.status(404).send(e.message);
 	}
 });
@@ -29,6 +47,8 @@ router.get('/:id', async function (req, res) {
 		res.status(404).send(e.message);
 	}
 });
+
+
 
 ///Create a user
 router.post('/', async function (req, res) {
