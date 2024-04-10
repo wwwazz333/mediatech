@@ -58,6 +58,35 @@ export async function getById(id: number): Promise<Author> {
 	}
 }
 
+///get a author by name
+///return the author found (that contains the name)
+export async function getByName(name: string): Promise<Author[]> {
+	const sql = `SELECT * FROM ${tableName} WHERE LOWER(name) LIKE '%' || LOWER(?) || '%'`;
+	const params = [name];
+
+	const rows = await new Promise((resolve, reject) => {
+		database.all(sql, params, (err, rows) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(rows);
+			}
+		});
+	});
+	try {
+		if (rows) {
+			console.debug("rows", rows)
+			const authors = z.array(authorSchema).parse(rows);
+
+			return authors;
+		} else {
+			throw new Error("No authors found");
+		}
+	} catch (e: any) {
+		throw new Error("Error parsing authors from BDD");
+	}
+}
+
 ///Create a author
 export async function create(author: Author): Promise<Author> {
 	const sql = `INSERT INTO ${tableName} (id, name) VALUES (?, ?)`;
