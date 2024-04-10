@@ -17,13 +17,18 @@ export async function getAll(): Promise<Borrow[]> {
 			}
 		});
 	});
-	try {
-		console.debug("rows", rows)
-		const borrows = z.array(borrowSchema).parse(rows);
+	if (rows) {
+		try {
+			console.debug("rows", rows)
+			const borrows = z.array(borrowSchema).parse(rows);
 
-		return borrows;
-	} catch (e: any) {
-		throw new Error("Error parsing borrows from BDD");
+			return borrows;
+		} catch (e: any) {
+			console.error("Error parsing borrows from BDD");
+			throw new Error("Error parsing borrows from BDD : " + e.message);
+		}
+	} else {
+		throw new Error("No borrows found");
 	}
 }
 
@@ -81,14 +86,14 @@ export async function getByIdUserAndIdBook(idUser: number, idBook: number): Prom
 ///Create a borrow
 export async function create(borrow: Borrow): Promise<Borrow> {
 	const sql = `INSERT INTO ${tableName} (idUser, idBook, dateBorrow) VALUES (?, ?, ?)`;
-	const params = [borrow.idUser, borrow.idBook, borrow.dateBorrow];
+	const params = [borrow.idUser, borrow.idBook, borrow.dateBorrow.toISOString()];
 
 	await new Promise((resolve, reject) => {
-		database.run(sql, params, function (err) {
+		database.run(sql, params, async function (err) {
 			if (err) {
 				reject(err);
 			} else {
-				resolve(borrow);
+				resolve(await getByIdUserAndIdBook(borrow.idUser, borrow.idBook));
 			}
 		});
 	});

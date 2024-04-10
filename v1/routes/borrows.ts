@@ -48,7 +48,7 @@ router.delete('/forUser/:idUser/forBook/:idBook', async function (req, res) {
 		const idUserParsed = z.number().parse(parseInt(idUser));
 		const idBookParsed = z.number().parse(parseInt(idBook));
 		const borrowCreated = await borrowService.remove(idUserParsed, idBookParsed);
-		res.status(201).json(borrowCreated);
+		res.json(borrowCreated);
 	}
 	catch (e: any) {
 		console.error("Error deleting borrow", e.message);
