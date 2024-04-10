@@ -1,30 +1,39 @@
 import { Router } from "express";
 import { z } from "zod";
-import { Book, BookSearch, bookSchema, bookSearchSchema } from "../models/books";
+import { BookSearch, bookSchema, bookSearchSchema } from "../models/books";
 import * as bookService from "../services/books";
 const router = Router();
 
 ///Get all books
 ///return all books found
 router.get('/', async function (req, res) {
-	const { name, id, genre, authorName } = req.query;
 	try {
-		let books: Book[] = []
-		if (!name && !id && !genre && !authorName) {
-			books = await bookService.getAll();
-		} else {
-			const bookSearch: BookSearch = bookSearchSchema.parse({
-				id: id ? parseInt(id as string) : null,
-				name: name,
-				genre: genre,
-				authorName: authorName
-			});
-			books = await bookService.searchBook(bookSearch);
-		}
+		let books = await bookService.getAll();
+
 		res.json(books);
 	}
 	catch (e: any) {
 		console.error("Error getting books", e.message);
+		res.status(404).send(e.message);
+	}
+});
+
+///Search books
+///return the books found
+router.get('/search', async function (req, res) {
+	const { name, id, genre, authorName } = req.query;
+	try {
+		const bookSearch: BookSearch = bookSearchSchema.parse({
+			id: id ? parseInt(id as string) : null,
+			name: name,
+			genre: genre,
+			authorName: authorName
+		});
+		const books = await bookService.searchBook(bookSearch);
+		res.json(books);
+	}
+	catch (e: any) {
+		console.error("Error searching books", e.message);
 		res.status(404).send(e.message);
 	}
 });

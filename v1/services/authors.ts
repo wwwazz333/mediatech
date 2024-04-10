@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Author, authorSchema } from "../models/author";
+import { Author, AuthorSearch, authorSchema } from "../models/author";
 import database from "./database";
 
 const tableName = "Author";
@@ -29,6 +29,31 @@ export async function getAll(): Promise<Author[]> {
 		}
 	} catch (e: any) {
 		throw new Error("Error parsing authors from BDD");
+	}
+}
+
+export async function searchAuthor({ id, name }: AuthorSearch): Promise<Author[]> {
+	const sql = `SELECT * FROM ${tableName} WHERE 1 = 1 AND (? IS NULL OR id = ?) AND (? IS NULL OR LOWER(name) LIKE '%' || LOWER(?) || '%')`;
+	const params = [id, id, name, name];
+
+	const rows = await new Promise((resolve, reject) => {
+		database.all(sql, params, (err, rows) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(rows);
+			}
+		});
+	});
+	if (rows) {
+		try {
+			const authors = z.array(authorSchema).parse(rows);
+			return authors;
+		} catch (e: any) {
+			throw new Error("Error parsing authors from BDD : " + e.message);
+		}
+	} else {
+		throw new Error("No authors found");
 	}
 }
 
