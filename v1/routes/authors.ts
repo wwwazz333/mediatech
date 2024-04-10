@@ -17,20 +17,6 @@ router.get('/', async function (req, res) {
 	}
 });
 
-///Get a author by id
-///return the author found
-router.get('/:id', async function (req, res) {
-	const { id } = req.params;
-	try {
-		const idAuthor = z.number().parse(parseInt(id));
-		const author = await authorService.getById(idAuthor);
-		res.json(author);
-
-	} catch (e: any) {
-		console.error(`Error parsing id ${id}`, e.message);
-		return res.status(404).send(e.message);
-	}
-});
 
 ///Search authors
 ///return the authors found
@@ -49,6 +35,22 @@ router.get('/search', async function (req, res) {
 		res.status(404).send(e.message);
 	}
 });
+
+///Get a author by id
+///return the author found
+router.get('/:id', async function (req, res) {
+	const { id } = req.params;
+	try {
+		const idAuthor = z.number().parse(parseInt(id));
+		const author = await authorService.getById(idAuthor);
+		res.json(author);
+
+	} catch (e: any) {
+		console.error(`Error parsing id ${id}`, e.message);
+		return res.status(404).send(e.message);
+	}
+});
+
 
 ///Create a author
 ///return the created author
