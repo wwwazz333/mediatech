@@ -12,7 +12,7 @@ router.get('/', async function (req, res) {
 	}
 	catch (e: any) {
 		console.error("Error getting borrows", e);
-		res.status(404).json(e);
+		res.status(404).send(e.message);
 	}
 });
 
@@ -29,12 +29,30 @@ router.post('/forUser/:idUser/forBook/:idBook', async function (req, res) {
 			idUser: idUserParsed,
 			idBook: idBookParsed
 		};
+		console.debug("newBorrow", newBorrow)
 		const borrowCreated = await borrowService.create(newBorrow);
 		res.status(201).json(borrowCreated);
 	}
 	catch (e: any) {
+		//if error constrainte error is {"errno": 19, "code": "SQLITE_CONSTRAINT" }
 		console.error("Error creation borrow", e.message);
-		res.status(400).json(e);
+		res.status(400).send(e.message);
+	}
+});
+
+///Delete a borrow
+///return the deleted borrow
+router.delete('/forUser/:idUser/forBook/:idBook', async function (req, res) {
+	const { idUser, idBook } = req.params;
+	try {
+		const idUserParsed = z.number().parse(parseInt(idUser));
+		const idBookParsed = z.number().parse(parseInt(idBook));
+		const borrowCreated = await borrowService.remove(idUserParsed, idBookParsed);
+		res.status(201).json(borrowCreated);
+	}
+	catch (e: any) {
+		console.error("Error deleting borrow", e.message);
+		res.status(400).send(e.message);;
 	}
 });
 

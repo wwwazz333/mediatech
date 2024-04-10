@@ -10,6 +10,15 @@ const db = new sqlite3.Database(dbName, (err) => {
 	} else {
 		console.info('Connected to the database.');
 		db.run(`
+		PRAGMA foreign_keys = ON;
+		`, (err) => {
+			if (err) {
+				console.error(err.message);
+			} else {
+				console.debug('Foreign key constraints activated');
+			}
+		});
+		db.run(`
 		CREATE TABLE IF NOT EXISTS "Book" (
 			"id" INTEGER NOT NULL UNIQUE,
 			"name" TEXT NOT NULL,
@@ -57,9 +66,8 @@ const db = new sqlite3.Database(dbName, (err) => {
 			"idBook" INTEGER NOT NULL,
 			"idAuthor" INTEGER NOT NULL,
 			PRIMARY KEY("idBook", "idAuthor"),
-			FOREIGN KEY ("idBook") REFERENCES "Book"("id")
-			ON UPDATE NO ACTION ON DELETE NO ACTION,
-			FOREIGN KEY ("idAuthor") REFERENCES "Author"("id") ON UPDATE NO ACTION ON DELETE NO ACTION
+			FOREIGN KEY ("idBook") REFERENCES "Book"("id"),
+			FOREIGN KEY ("idAuthor") REFERENCES "Author"("id")
 		);
 		`, (err) => {
 			if (err) {
@@ -74,9 +82,8 @@ const db = new sqlite3.Database(dbName, (err) => {
 			"idUser" INTEGER NOT NULL,
 			"dateBorrow" TEXT NOT NULL,
 			PRIMARY KEY("idBook", "idUser"),
-			FOREIGN KEY ("idBook") REFERENCES "Book"("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
+			FOREIGN KEY ("idBook") REFERENCES "Book"("id"),
 			FOREIGN KEY ("idUser") REFERENCES "User"("id")
-			ON UPDATE NO ACTION ON DELETE NO ACTION
 		);
 		
 		`, (err) => {
