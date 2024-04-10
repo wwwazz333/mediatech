@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Borrow, borrowSchema } from "../models/borrow";
+import { Borrow, BorrowSearch, borrowSchema } from "../models/borrow";
 import database from "./database";
 
 const tableName = "Borrow";
@@ -25,6 +25,35 @@ export async function getAll(): Promise<Borrow[]> {
 			return borrows;
 		} catch (e: any) {
 			console.error("Error parsing borrows from BDD");
+			throw new Error("Error parsing borrows from BDD : " + e.message);
+		}
+	} else {
+		throw new Error("No borrows found");
+	}
+}
+
+///search borrows
+export async function searchBorrow({ idUser, idBook, dateBorrow }: BorrowSearch): Promise<Borrow[]> {
+	//FIX : search by dateBorrow not working
+	const sql = `SELECT * FROM ${tableName} WHERE (? IS NULL OR idUser = ?) AND (? IS NULL OR idBook = ?) AND (? IS NULL OR dateBorrow = ?)`;
+	const params = [idUser, idUser, idBook, idBook, dateBorrow, dateBorrow];
+
+	const rows = await new Promise((resolve, reject) => {
+		database.all(sql, params, (err, rows) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(rows);
+			}
+		});
+	});
+	if (rows) {
+		try {
+			console.debug("rows", rows)
+			const borrows = z.array(borrowSchema).parse(rows);
+
+			return borrows;
+		} catch (e: any) {
 			throw new Error("Error parsing borrows from BDD : " + e.message);
 		}
 	} else {

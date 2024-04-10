@@ -33,7 +33,7 @@ export async function getAll(): Promise<Author[]> {
 }
 
 export async function searchAuthor({ id, name }: AuthorSearch): Promise<Author[]> {
-	const sql = `SELECT * FROM ${tableName} WHERE 1 = 1 AND (? IS NULL OR id = ?) AND (? IS NULL OR LOWER(name) LIKE '%' || LOWER(?) || '%')`;
+	const sql = `SELECT * FROM ${tableName} WHERE (? IS NULL OR id = ?) AND (? IS NULL OR LOWER(name) LIKE '%' || LOWER(?) || '%')`;
 	const params = [id, id, name, name];
 
 	const rows = await new Promise((resolve, reject) => {

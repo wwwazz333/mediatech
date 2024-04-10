@@ -30,7 +30,7 @@ export async function getAll(): Promise<Book[]> {
 ///Research books
 ///return the books found
 export async function searchBook({ id, name, genre, authorName }: BookSearch): Promise<Book[]> {
-	const sql = `SELECT * FROM ${tableName} WHERE 1 = 1 AND (? IS NULL OR id = ?) AND (? IS NULL OR LOWER(name) LIKE '%' || LOWER(?) || '%') AND (? IS NULL OR LOWER(genre) LIKE '%' || LOWER(?) || '%') AND (? IS NULL OR id IN (SELECT idBook FROM Written WHERE idAuthor IN (SELECT id FROM Author WHERE LOWER(name) LIKE '%' || LOWER(?) || '%')))`;
+	const sql = `SELECT * FROM ${tableName} WHERE (? IS NULL OR id = ?) AND (? IS NULL OR LOWER(name) LIKE '%' || LOWER(?) || '%') AND (? IS NULL OR LOWER(genre) LIKE '%' || LOWER(?) || '%') AND (? IS NULL OR id IN (SELECT idBook FROM Written WHERE idAuthor IN (SELECT id FROM Author WHERE LOWER(name) LIKE '%' || LOWER(?) || '%')))`;
 	const params = [id, id, name, name, genre, genre, authorName, authorName];
 
 	const rows = await new Promise((resolve, reject) => {
