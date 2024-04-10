@@ -83,6 +83,35 @@ export async function getByIdUserAndIdBook(idUser: number, idBook: number): Prom
 	}
 }
 
+///Get all borrows by book id
+export async function getByBookId(id: number): Promise<Borrow[]> {
+	const sql = `SELECT * FROM ${tableName} WHERE idBook = ?`;
+	const params = [id];
+
+	const rows = await new Promise((resolve, reject) => {
+		database.all(sql, params, (err, rows) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(rows);
+			}
+		});
+	});
+	if (rows) {
+		try {
+			console.debug("rows", rows)
+			const borrows = z.array(borrowSchema).parse(rows);
+
+			return borrows;
+		} catch (e: any) {
+			throw new Error("Error parsing borrows from BDD : " + e.message);
+		}
+	} else {
+		throw new Error("No borrows found");
+	}
+}
+
+
 ///Create a borrow
 export async function create(borrow: Borrow): Promise<Borrow> {
 	const sql = `INSERT INTO ${tableName} (idUser, idBook, dateBorrow) VALUES (?, ?, ?)`;

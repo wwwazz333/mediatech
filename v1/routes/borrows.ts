@@ -15,6 +15,18 @@ router.get('/', async function (req, res) {
 		res.status(404).send(e.message);
 	}
 });
+router.get('/user/:id', async function (req, res) {
+	const { id } = req.params;
+	try {
+		const idParsed = z.number().parse(parseInt(id));
+		const borrows = await borrowService.getByUserId(idParsed);
+		res.json(borrows);
+	}
+	catch (e: any) {
+		console.error("Error getting borrows for user id " + id, e.message);
+		res.status(404).send(e.message);
+	}
+});
 
 
 ///Borrow a book
