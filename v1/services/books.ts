@@ -56,6 +56,91 @@ export async function getById(id: number): Promise<Book> {
 	}
 }
 
+
+
+//Get all books by name
+export async function getByName(name: string): Promise<Book[]> {
+	const sql = `SELECT * FROM ${tableName} WHERE name = ?`;
+	const params = [name];
+
+	const row = await new Promise((resolve, reject) => {
+		database.get(sql, params, (err, row) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(row);
+			}
+		});
+	});
+
+	if (row) {
+		try {
+			const books = z.array(bookSchema).parse(row);
+			return books;
+		} catch (e: any) {
+			throw new Error("Error parsing book from BDD : " + e.message);
+		}
+	} else {
+		throw new Error(`Book with name ${name} not found`);
+	}
+}
+
+//Get all books by genre
+export async function getByGenre(genre: string): Promise<Book[]> {
+	const sql = `SELECT * FROM ${tableName} WHERE genre LIKE '%?%'`;
+	const params = [genre];
+
+	const row = await new Promise((resolve, reject) => {
+		database.get(sql, params, (err, row) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(row);
+			}
+		});
+	});
+
+	if (row) {
+		try {
+			const books = z.array(bookSchema).parse(row);
+			return books;
+		} catch (e: any) {
+			throw new Error("Error parsing book from BDD : " + e.message);
+		}
+	} else {
+		throw new Error(`Book with genre ${genre} not found`);
+	}
+}
+
+//Get all books by author
+export async function getByAuthor(author: string): Promise<Book[]> {
+	const sql = `SELECT * FROM ${tableName} WHERE author = ?`;
+	const params = [author];
+
+	const row = await new Promise((resolve, reject) => {
+		database.get(sql, params, (err, row) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(row);
+			}
+		});
+	});
+
+	if (row) {
+		try {
+			const books = z.array(bookSchema).parse(row);
+			return books;
+		} catch (e: any) {
+			throw new Error("Error parsing book from BDD : " + e.message);
+		}
+	} else {
+		throw new Error(`Book with author ${author} not found`);
+	}
+}
+
+
+
 ///Create a book
 export async function create(book: Book): Promise<Book> {
 	const sql = `INSERT INTO ${tableName} (id, name, description, genre, numberAvailable) VALUES (?, ?, ?, ?, ?)`;
