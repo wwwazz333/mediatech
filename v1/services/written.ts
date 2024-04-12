@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Written, writtenSchema } from "../models/written";
+import { Written, WrittenSearch, writtenSchema } from "../models/written";
 import database from "./database";
 
 
@@ -29,6 +29,35 @@ export async function getAll(): Promise<Written[]> {
 		return written;
 	} catch (e: any) {
 		throw new Error("Error parsing writtens from BDD : " + e.message);
+	}
+}
+
+///search written
+///return the written found
+export async function searchWritten({ idBook, idAuthor }: WrittenSearch): Promise<Written[]> {
+	const sql = `SELECT * FROM ${tableName} WHERE (? IS NULL OR idBook = ?) AND (? IS NULL OR idAuthor = ?)`;
+	const params = [idBook, idBook, idAuthor, idAuthor];
+
+	const rows = await new Promise((resolve, reject) => {
+		database.all(sql, params, (err, rows) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(rows);
+			}
+		});
+	});
+	if (rows) {
+		try {
+			console.debug("rows", rows)
+			const written = z.array(writtenSchema).parse(rows);
+
+			return written;
+		} catch (e: any) {
+			throw new Error("Error parsing written from BDD : " + e.message);
+		}
+	} else {
+		throw new Error("No written found");
 	}
 }
 

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { Borrow } from "../models/borrow";
+import { Borrow, BorrowSearch, borrowSearchSchema } from "../models/borrow";
 import * as borrowService from "../services/borrows";
 const router = Router();
 
@@ -15,6 +15,26 @@ router.get('/', async function (req, res) {
 		res.status(404).send(e.message);
 	}
 });
+
+///search borrows
+router.get('/search', async function (req, res) {
+	const { idUser, idBook, dateBorrow } = req.query;
+	try {
+		const borrowSearch: BorrowSearch = borrowSearchSchema.parse({
+			idUser: idUser ? parseInt(idUser as string) : null,
+			idBook: idBook ? parseInt(idBook as string) : null,
+			dateBorrow: dateBorrow ? new Date(dateBorrow as string) : null
+		});
+		const borrows = await borrowService.searchBorrow(borrowSearch);
+		res.json(borrows);
+	}
+	catch (e: any) {
+		console.error("Error searching borrows", e.message);
+		res.status(404).send(e.message);
+	}
+});
+
+
 router.get('/user/:id', async function (req, res) {
 	const { id } = req.params;
 	try {

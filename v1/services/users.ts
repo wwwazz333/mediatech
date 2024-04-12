@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { User, userSchema } from "../models/user";
+import { User, UserSearch, userSchema } from "../models/user";
 import database from "./database";
 
 const tableName = "User";
@@ -29,6 +29,32 @@ export async function getAll(): Promise<User[]> {
 		}
 	} catch (e: any) {
 		throw new Error("Error parsing users from BDD");
+	}
+}
+
+///search users
+export async function searchUser({ id, name }: UserSearch): Promise<User[]> {
+	const sql = `SELECT * FROM ${tableName} WHERE (? IS NULL OR id = ?) AND (? IS NULL OR LOWER(name) LIKE '%' || LOWER(?) || '%')`;
+	const params = [id, id, name, name];
+
+	const rows = await new Promise((resolve, reject) => {
+		database.all(sql, params, (err, rows) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(rows);
+			}
+		});
+	});
+	if (rows) {
+		try {
+			const users = z.array(userSchema).parse(rows);
+			return users;
+		} catch (e: any) {
+			throw new Error("Error parsing users from BDD : " + e.message);
+		}
+	} else {
+		throw new Error("No users found");
 	}
 }
 

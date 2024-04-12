@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { writtenSchema } from "../models/written";
+import { writtenSchema, writtenSearchSchema } from "../models/written";
 import * as writtenService from "../services/written";
 const router = Router();
 
@@ -18,6 +18,25 @@ router.get('/', async function (req, res) {
 	}
 	catch (e: any) {
 		console.error("Error getting writtens", e);
+		res.status(404).send(e.message);
+	}
+});
+
+///search writtens
+///return the writtens found
+router.get('/search', async function (req, res) {
+	//TODO : date publication
+	const { idBook, idAuthor } = req.query;
+	try {
+		const writtenSearch = writtenSearchSchema.parse({
+			idBook: idBook ? parseInt(idBook as string) : null,
+			idAuthor: idAuthor ? parseInt(idAuthor as string) : null
+		});
+		const writtens = await writtenService.searchWritten(writtenSearch);
+		res.json(writtens);
+	}
+	catch (e: any) {
+		console.error("Error searching writtens", e.message);
 		res.status(404).send(e.message);
 	}
 });

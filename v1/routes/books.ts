@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { bookSchema } from "../models/books";
+import { BookSearch, bookSchema, bookSearchSchema } from "../models/books";
 import * as bookService from "../services/books";
 const router = Router();
 
@@ -8,11 +8,32 @@ const router = Router();
 ///return all books found
 router.get('/', async function (req, res) {
 	try {
-		const books = await bookService.getAll();
+		let books = await bookService.getAll();
+
 		res.json(books);
 	}
 	catch (e: any) {
-		console.error("Error getting books", e);
+		console.error("Error getting books", e.message);
+		res.status(404).send(e.message);
+	}
+});
+
+///Search books
+///return the books found
+router.get('/search', async function (req, res) {
+	const { name, id, genre, authorName } = req.query;
+	try {
+		const bookSearch: BookSearch = bookSearchSchema.parse({
+			id: id ? parseInt(id as string) : null,
+			name: name,
+			genre: genre,
+			authorName: authorName
+		});
+		const books = await bookService.searchBook(bookSearch);
+		res.json(books);
+	}
+	catch (e: any) {
+		console.error("Error searching books", e.message);
 		res.status(404).send(e.message);
 	}
 });
@@ -32,48 +53,6 @@ router.get('/:id', async function (req, res) {
 	}
 });
 
-
-///Get books by name
-///return the books found (that contains the name)
-router.get('/name/:name', async function (req, res) {
-	const { name } = req.params;
-	try {
-		const books = await bookService.getByName(name);
-		res.json(books);
-
-	} catch (e: any) {
-		console.error(`Error parsing books ${name}`, e.message);
-		return res.status(404).send(e.message);
-	}
-});
-
-///Get books by genre
-///return the books found (that contains the genre)
-router.get('/genre/:genre', async function (req, res) {
-	const { genre } = req.params;
-	try {
-		const books = await bookService.getByGenre(genre);
-		res.json(books);
-
-	} catch (e: any) {
-		console.error(`Error parsing books ${genre}`, e.message);
-		return res.status(404).send(e.message);
-	}
-});
-
-///Get books by author name
-///return the books found (written by the author)
-router.get('/author/:nameAuthor', async function (req, res) {
-	const { nameAuthor } = req.params;
-	try {
-		const books = await bookService.getByAuthor(nameAuthor);
-		res.json(books);
-
-	} catch (e: any) {
-		console.error(`Error parsing books ${nameAuthor}`, e.message);
-		return res.status(404).send(e.message);
-	}
-});
 
 ///Create a book
 ///return the created book

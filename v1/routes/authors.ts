@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { authorSchema } from "../models/author";
+import { authorSchema, authorSearchSchema } from "../models/author";
 import * as authorService from "../services/authors";
 const router = Router();
 
@@ -13,6 +13,25 @@ router.get('/', async function (req, res) {
 	}
 	catch (e: any) {
 		console.error("Error getting authors", e);
+		res.status(404).send(e.message);
+	}
+});
+
+
+///Search authors
+///return the authors found
+router.get('/search', async function (req, res) {
+	const { name, id } = req.query;
+	try {
+		const authorSearch = authorSearchSchema.parse({
+			id: id ? parseInt(id as string) : null,
+			name: name
+		});
+		const authors = await authorService.searchAuthor(authorSearch);
+		res.json(authors);
+	}
+	catch (e: any) {
+		console.error("Error searching authors", e.message);
 		res.status(404).send(e.message);
 	}
 });
@@ -31,6 +50,7 @@ router.get('/:id', async function (req, res) {
 		return res.status(404).send(e.message);
 	}
 });
+
 
 ///Create a author
 ///return the created author

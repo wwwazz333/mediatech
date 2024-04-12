@@ -16,5 +16,20 @@ export const bookSchema = z.object({
 	name: z.string(),
 	description: z.string().optional().nullable(),
 	genre: z.string().optional().nullable(),
-	numberAvailable: z.number().positive("Number of books available must be positive")
+	numberAvailable: z.number().nonnegative("Number of books available must be positive")
+})
+
+
+export interface BookSearch {
+	id?: number | null,
+	name?: string | null,
+	genre?: string | null,
+	authorName?: string | null
+}
+
+export const bookSearchSchema = z.object({
+	id: z.number().optional().nullable(),
+	name: z.string().optional().nullable(),
+	genre: z.string().optional().nullable(),
+	authorName: z.string().optional().nullable()
 })

@@ -11,3 +11,14 @@ export const authorSchema = z.object({
 	id: z.number().optional().nullable(),
 	name: z.string()
 })
+
+
+export interface AuthorSearch {
+	id?: number | null,
+	name?: string | null
+}
+
+export const authorSearchSchema = z.object({
+	id: z.number().optional().nullable(),
+	name: z.string().optional().nullable()
+})
